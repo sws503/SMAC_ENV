@@ -48,8 +48,8 @@ actions = {
     "attack": 23,  # target: PointOrUnit
     "stop": 4,  # target: None
     "heal": 386,  # Unit
-    "forcefield": 193,
-    "psistorm": 218,
+    "forcefield": 1526, #cmd_screen
+    "psistorm": 1036,
 }
 
 class Direction(enum.IntEnum):
@@ -65,7 +65,7 @@ class StarCraft2Env(MultiAgentEnv):
     """
     def __init__(
         self,
-        map_name="DefeatRoaches_Woong",
+        map_name="3Reapers_marine",
         step_mul=8,
         move_amount=2,
         difficulty="7",
@@ -484,6 +484,9 @@ class StarCraft2Env(MultiAgentEnv):
         x = unit.pos.x
         y = unit.pos.y
 
+        # self.epsilon_a = 0.5
+        # self.epsilon_b = 1.0
+
         if action == 0:
             # no-op (valid only when dead)
             assert unit.health == 0, "No-op only available for dead agents."
@@ -545,28 +548,66 @@ class StarCraft2Env(MultiAgentEnv):
         else:
             # attack/heal units that are in range
             target_id = action - self.n_actions_no_attack
-            if self.map_type == "MMM" and unit.unit_type == self.medivac_id:
-                target_unit = self.agents[target_id]
-                action_name = "heal"
-            else:
-                target_unit = self.enemies[target_id]
-                action_name = "attack"
-            # if self.map_type == "Sentry_HT_Woong" and unit.unit_type == self.sentry_id:
-            #     action_name = "forcefield"
+            # if self.map_type == "MMM" and unit.unit_type == self.medivac_id:
+            #     target_unit = self.agents[target_id]
+            #     action_name = "heal"
+            #     action_id = actions[action_name]
+            #     target_tag = target_unit.tag
+            #     cmd = r_pb.ActionRawUnitCommand(
+            #         ability_id=action_id,
+            #         target_unit_tag=target_tag,
+            #         unit_tags=[tag],
+            #         queue_command=False)
             # else:
+            #     target_unit = self.enemies[target_id]
             #     action_name = "attack"
+            #     action_id = actions[action_name]
+            #     target_tag = target_unit.tag
+            #     cmd = r_pb.ActionRawUnitCommand(
+            #         ability_id=action_id,
+            #         target_unit_tag=target_tag,
+            #         unit_tags=[tag],
+            #         queue_command=False)
 
-            ## self.sentry_id = min_unit_type
-            ## self.hightemplar_id = min_unit_type + 1
+            if self.map_type == "Sentry_HT_Woong":
+                if unit.unit_type == self.hightemplar_id:
+                    action_name = "forcefield"
+                    action_id = actions[action_name]
+                    cmd = r_pb.ActionRawUnitCommand(
+                        ability_id=actions[action_name],
+                        target_world_space_pos=sc_common.Point2D( x=x - self._move_amount, y=y),
+                        unit_tags=[tag],
+                        queue_command=False)
+                else:
+                    target_unit = self.enemies[target_id]
+                    action_name = "attack"
+                    action_id = actions[action_name]
+                    target_tag = target_unit.tag
+                    cmd = r_pb.ActionRawUnitCommand(
+                        ability_id=action_id,
+                        target_unit_tag=target_tag,
+                        unit_tags=[tag],
+                        queue_command=False)
 
-            action_id = actions[action_name]
-            target_tag = target_unit.tag
+                if unit.unit_type == self.sentry_id:
+                    action_name = "psistorm"
+                    action_id = actions[action_name]
+                    cmd = r_pb.ActionRawUnitCommand(
+                        ability_id=actions[action_name],
+                        target_world_space_pos=sc_common.Point2D( x=x - self._move_amount, y=y),
+                        unit_tags=[tag],
+                        queue_command=False)
 
-            cmd = r_pb.ActionRawUnitCommand(
-                ability_id=action_id,
-                target_unit_tag=target_tag,
-                unit_tags=[tag],
-                queue_command=False)
+                else:
+                    target_unit = self.enemies[target_id]
+                    action_name = "attack"
+                    action_id = actions[action_name]
+                    target_tag = target_unit.tag
+                    cmd = r_pb.ActionRawUnitCommand(
+                        ability_id=action_id,
+                        target_unit_tag=target_tag,
+                        unit_tags=[tag],
+                        queue_command=False)
 
             if self.debug:
                 logging.debug("Agent {} {}s unit # {}".format(
@@ -1301,6 +1342,11 @@ class StarCraft2Env(MultiAgentEnv):
                     type_id = 0
                 else:
                     type_id = 1
+            elif self.map_type == "3marine":
+                if unit.unit_type == 48:
+                    type_id = 0
+                else:
+                    type_id = 1
 
         return type_id
 
@@ -1515,6 +1561,9 @@ class StarCraft2Env(MultiAgentEnv):
             self.sentry_id = min_unit_type
             self.hightemplar_id = min_unit_type + 1
         elif self.map_type == "3Reapers":
+            self.reaper_id = min_unit_type
+            self.probe_id = min_unit_type + 1
+        elif self.map_type == "3marine":
             self.reaper_id = min_unit_type
             self.probe_id = min_unit_type + 1
             

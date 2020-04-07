@@ -13,6 +13,15 @@ class SMACMap(lib.Map):
     game_steps_per_episode = 0
 
 map_param_registry = {
+    "3Reapers_marine": {
+        "n_agents": 3,
+        "n_enemies": 12,
+        "limit": 120,
+        "a_race": "T",
+        "b_race": "P",
+        "unit_type_bits": 2,
+        "map_type": "3marine",
+    },
     "3Reapers_Woong": {
         "n_agents": 3,
         "n_enemies": 12,
