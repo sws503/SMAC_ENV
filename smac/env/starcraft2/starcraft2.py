@@ -484,9 +484,6 @@ class StarCraft2Env(MultiAgentEnv):
         x = unit.pos.x
         y = unit.pos.y
 
-        # self.epsilon_a = 0.5
-        # self.epsilon_b = 1.0
-
         if action == 0:
             # no-op (valid only when dead)
             assert unit.health == 0, "No-op only available for dead agents."
@@ -501,7 +498,6 @@ class StarCraft2Env(MultiAgentEnv):
                 queue_command=False)
             if self.debug:
                 logging.debug("Agent {}: Stop".format(a_id))
-
         elif action == 2:
             # move north
             cmd = r_pb.ActionRawUnitCommand(
@@ -512,7 +508,6 @@ class StarCraft2Env(MultiAgentEnv):
                 queue_command=False)
             if self.debug:
                 logging.debug("Agent {}: Move North".format(a_id))
-
         elif action == 3:
             # move south
             cmd = r_pb.ActionRawUnitCommand(
@@ -523,7 +518,6 @@ class StarCraft2Env(MultiAgentEnv):
                 queue_command=False)
             if self.debug:
                 logging.debug("Agent {}: Move South".format(a_id))
-
         elif action == 4:
             # move east
             cmd = r_pb.ActionRawUnitCommand(
@@ -534,7 +528,6 @@ class StarCraft2Env(MultiAgentEnv):
                 queue_command=False)
             if self.debug:
                 logging.debug("Agent {}: Move East".format(a_id))
-
         elif action == 5:
             # move west
             cmd = r_pb.ActionRawUnitCommand(
@@ -568,46 +561,32 @@ class StarCraft2Env(MultiAgentEnv):
             #         target_unit_tag=target_tag,
             #         unit_tags=[tag],
             #         queue_command=False)
-
-            if self.map_type == "Sentry_HT_Woong":
-                if unit.unit_type == self.hightemplar_id:
-                    action_name = "forcefield"
-                    action_id = actions[action_name]
-                    cmd = r_pb.ActionRawUnitCommand(
-                        ability_id=actions[action_name],
-                        target_world_space_pos=sc_common.Point2D( x=x - self._move_amount, y=y),
-                        unit_tags=[tag],
-                        queue_command=False)
-                else:
-                    target_unit = self.enemies[target_id]
-                    action_name = "attack"
-                    action_id = actions[action_name]
-                    target_tag = target_unit.tag
-                    cmd = r_pb.ActionRawUnitCommand(
-                        ability_id=action_id,
-                        target_unit_tag=target_tag,
-                        unit_tags=[tag],
-                        queue_command=False)
-
-                if unit.unit_type == self.sentry_id:
-                    action_name = "psistorm"
-                    action_id = actions[action_name]
-                    cmd = r_pb.ActionRawUnitCommand(
-                        ability_id=actions[action_name],
-                        target_world_space_pos=sc_common.Point2D( x=x - self._move_amount, y=y),
-                        unit_tags=[tag],
-                        queue_command=False)
-
-                else:
-                    target_unit = self.enemies[target_id]
-                    action_name = "attack"
-                    action_id = actions[action_name]
-                    target_tag = target_unit.tag
-                    cmd = r_pb.ActionRawUnitCommand(
-                        ability_id=action_id,
-                        target_unit_tag=target_tag,
-                        unit_tags=[tag],
-                        queue_command=False)
+            if self.map_type == "Sentry_HT_Woong" and unit.unit_type == 75: #self.hightemplar_id:
+                action_name = "psistorm"
+                action_id = actions[action_name]
+                cmd = r_pb.ActionRawUnitCommand(
+                    ability_id=actions[action_name],
+                    target_world_space_pos=sc_common.Point2D( x=x - self._move_amount, y=y),
+                    unit_tags=[tag],
+                    queue_command=False)
+            elif self.map_type == "Sentry_HT_Woong" and unit.unit_type == 77: # self.sentry_id:
+                action_name = "forcefield"
+                action_id = actions[action_name]
+                cmd = r_pb.ActionRawUnitCommand(
+                    ability_id=actions[action_name],
+                    target_world_space_pos=sc_common.Point2D( x=x - self._move_amount, y=y),
+                    unit_tags=[tag],
+                    queue_command=False)
+            else:
+                target_unit = self.enemies[target_id]
+                action_name = "attack"
+                action_id = actions[action_name]
+                target_tag = target_unit.tag
+                cmd = r_pb.ActionRawUnitCommand(
+                    ability_id=action_id,
+                    target_unit_tag=target_tag,
+                    unit_tags=[tag],
+                    queue_command=False)
 
             if self.debug:
                 logging.debug("Agent {} {}s unit # {}".format(
